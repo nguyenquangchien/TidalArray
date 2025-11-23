@@ -44,7 +44,7 @@ Forcing files:  `gridES2008.nc`  and  `hfES2008.nc`.
 
 #### Input paths
 1. Mesh: mesh to interpolate data to and calculate on.
-2. Bathymetry: bathymetry files, in order from least to highest resolution. See bathymetry.py in tools.
+2. Bathymetry: bathymetry files, in order from least to highest resolution. See `bathymetry.py` in `tools`.
 3. Forcing: tidal signal forcing data.
 4. Detectors: detector locations.
 5. Bed morphology: bed morphology data file.
@@ -186,11 +186,47 @@ Generates:
 - `outputs_CASE/outputs_run/elevation_imported.pvd` & corresponding `.pvtu` and `.vtu` files: imported elevation data to be viewed with ParaView  
 - `outputs_CASE/outputs_run/manning.pvd` & corresponding `.pvtu` and `.vtu` files: friction data to be viewed with ParaView  
 - `outputs_CASE/outputs_run/velocity_imported.pvd` & corresponding `.pvtu` and `.vtu` files: imported velocity data to be viewed with ParaView  
-- `outputs_CASE/outputs_run/viscosity.pvd & corresponding` `.pvtu` and `.vtu` files: viscosity data to be viewed with ParaView  
+- `outputs_CASE/outputs_run/viscosity.pvd & corresponding` `.pvtu` and `.vtu` files: viscosity data to be viewed with ParaView.
+
+### 3_postproc.py
+
+Assuming that we finish simulation, and the results are stored in different folders according to various scenarios:
+
+* Base case, named e.g. `outputs_BASECASE`
+* Coarse-grid case, e.g. `outputs_COARSEGRID`
+* Fine-grid case, e.g. `outputs_FINEGRID`
+* No-turbine case, e.g. `outputs_NOTRB`
+* Full-array case, e.g. `outputs_ARRAY`
+
+Then rename the corresponding folders in the [code file](https://github.com/nguyenquangchien/TidalArray/blob/7fb01756158157f087cd34467658f2aea37e7c7b/src/3_postproc.py#L31). 
+
+Running this script can be done in two steps:
+
+* Step 1: to produce the intermediate flux files `raw_flux_output/sthuv_base_ext.npy` and `raw_flux_output/Q_all_ext.npy`
+* Step 2: indicate the corresponding files in the [code file](https://github.com/nguyenquangchien/TidalArray/blob/7fb01756158157f087cd34467658f2aea37e7c7b/src/3_postproc.py#L558) and run to produce the plots similar to that presented in the present paper. 
+
+### 4_plot_diff.py
+
+The script is for plotting the difference in flow field and energy flux between the base (e.g. ambient) case and the modified (altered) case. The plots will be shown as filled contours.
+
+As with the above script, be careful first to get the correct names for output (simulated) folders, and filled in the code statements: 
+
+* [`compare_and_plot`](https://github.com/nguyenquangchien/TidalArray/blob/7fb01756158157f087cd34467658f2aea37e7c7b/src/4_plot_diff.py#L379): for plotting the difference in velocity.
+* `compare_and_plot_flux`: for plotting the difference in energy flux.
+
+The parameters for these functions/statements are:
+* `levels`: for example `(-80, 80, 17)` will show difference ranging from -80% to +80% with 17 levels of contour lines.
+* `folder`: name of folder to save the image files in.
+* `fformat`: file format for such image files, e.g. `png` or `pdf` (for simple plots).
+* `quantity` and `scenario`: to generate appropriate file names.
+* `subfig`: annotates on the plots. Specifically when preparing paper manuscripts, to indicate the order within a figure.
+
 
 ## Validation
 
-The validation scripts can be used to compare tracked velocities and elevations in the model to measured data. This includes plotting water level and velocity-time series, peak velocities and turbine powers. A number of predefined metrics to quantify the goodness-of-fit between the model and the data is established, including root-mean-square error (RMSE), mean absolute error (MAE), bias, and coefficient of determination (R2).
+The validation scripts can be used to compare tracked velocities and elevations in the model to measured data. This includes plotting water level and velocity-time series, peak velocities and turbine powers. A number of predefined metrics to quantify the goodness-of-fit between the model and the data is established, including root-mean-square error (RMSE), mean absolute error (MAE), bias, and coefficient of determination (R^2^).
 
 * `gof.py`: Performing godness-of-fit between a time series of water level (or generally, a scalar quantity) against observed data.
 * `gof_vel.py`: Performing godness-of-fit between a time series of velocity (or generally, a vector quantity) against observed data. Also separates flood and ebb phases, analyses velocity peaks and histograms.
+
+The scripts can be invoked after simulation stopped, e.g. after step 2 mentioned above.
